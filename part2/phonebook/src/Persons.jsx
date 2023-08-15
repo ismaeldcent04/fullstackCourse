@@ -1,17 +1,25 @@
 import React from "react";
 
-export const Persons = ({ newSearch, persons, filteredPerson }) => {
+export const Persons = ({ newSearch, persons, filteredPerson, onDelete }) => {
   return (
     <ul>
       {newSearch === ""
         ? persons.map((person) => (
-            <li key={person.name}>
-              {person.name} {person.phone}
+            <li key={person.id}>
+              {person.name} {person.phone + " "}
+              <button onClick={() => onDelete(person.id, person.name)}>
+                {" "}
+                delete
+              </button>
             </li>
           ))
         : filteredPerson.map((person) => (
             <li key={person.id}>
-              {person.name} {person.phone}
+              {person.name} {person.phone + " "}
+              <button onClick={() => onDelete(person.id, person.name)}>
+                {" "}
+                delete
+              </button>
             </li>
           ))}
     </ul>
