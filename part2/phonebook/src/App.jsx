@@ -26,7 +26,7 @@ const App = () => {
     e.preventDefault();
     const newPerson = {
       name: newName,
-      phone: newPhone,
+      number: newPhone,
     };
 
     const repeatedName = persons.filter((person) => person.name === newName);

@@ -6,7 +6,7 @@ export const Persons = ({ newSearch, persons, filteredPerson, onDelete }) => {
       {newSearch === ""
         ? persons.map((person) => (
             <li key={person.id}>
-              {person.name} {person.phone + " "}
+              {person.name} {person.number + " "}
               <button onClick={() => onDelete(person.id, person.name)}>
                 {" "}
                 delete
@@ -15,7 +15,7 @@ export const Persons = ({ newSearch, persons, filteredPerson, onDelete }) => {
           ))
         : filteredPerson.map((person) => (
             <li key={person.id}>
-              {person.name} {person.phone + " "}
+              {person.name} {person.number + " "}
               <button onClick={() => onDelete(person.id, person.name)}>
                 {" "}
                 delete
