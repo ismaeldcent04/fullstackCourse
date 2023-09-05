@@ -1,10 +1,10 @@
 import React from "react";
-import Blog from "./Blog";
-export const BlogList = ({ blogs }) => {
+import { Blog } from "./Blog";
+export const BlogList = ({ blogs, LoggedUser }) => {
   return (
     <div>
       {blogs.map((blog) => (
-        <Blog key={blog.id} blog={blog} />
+        <Blog LoggedUser={LoggedUser} key={blog.id} blog={blog} />
       ))}
     </div>
   );

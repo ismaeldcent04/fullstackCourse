@@ -17,6 +17,15 @@ blogsRouter.get("/", async (request, response) => {
   response.json(blogs);
 });
 
+blogsRouter.get("/:id", async (request, response) => {
+  const blog = await Blog.findById(request.params.id).populate("user");
+  if (blog) {
+    response.json(blog);
+  } else {
+    response.status(404).send({ error: "Wrong ID" });
+  }
+});
+
 blogsRouter.post("/", async (request, response) => {
   const body = request.body;
 
@@ -28,9 +37,9 @@ blogsRouter.post("/", async (request, response) => {
 
   const blog = new Blog({
     title: body.title,
-    author: body.autor,
+    author: body.author,
     url: body.url,
-    likes: body.likes,
+    likes: body.likes ? body.likes : 0,
     user: user.id,
   });
 
@@ -51,6 +60,30 @@ blogsRouter.delete("/:id", async (request, response) => {
   await Blog.findByIdAndRemove(request.params.id);
 
   response.status(201).send("Blog succesfully deleted");
+});
+
+blogsRouter.put("/:id", async (request, response) => {
+  const body = request.body;
+  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+  // const blog = await Blog.findById(request.params.id);
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: "Token invalid" });
+  }
+  // } else if (!(blog.user.toString() === decodedToken.id.toString())) {
+  //   return response.status(401).json({ error: "You are not allow to do this" });
+  // }
+  const blog = {
+    user: body.user.id,
+    likes: body.likes,
+    author: body.author,
+    title: body.title,
+    url: body.url,
+  };
+
+  const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, {
+    new: true,
+  });
+  return response.json(updatedBlog);
 });
 
 module.exports = blogsRouter;
