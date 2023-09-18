@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateAnecdotes } from "../reducers/anecdoteReducer";
-import { setMessage, setNotification } from "../reducers/notificationReducer";
+import { setNotification } from "../reducers/notificationReducer";
 
 export const AnecdoteList = () => {
   const anecdotes = useSelector((state) => {
