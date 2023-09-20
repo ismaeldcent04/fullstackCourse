@@ -11,11 +11,13 @@ export const useField = (type, name) => {
   };
 
   return {
-    type,
-    name,
-    value,
     reset,
-    onChange,
+    fields: {
+      type,
+      value,
+      name,
+      onChange,
+    },
   };
 };
 
