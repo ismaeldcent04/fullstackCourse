@@ -1,31 +1,15 @@
 import { useState } from "react";
-import blogService from "../services/blogs";
+import { useDispatch } from "react-redux";
+import { deleteBlogs, likeBlogs } from "../reducers/blogReducer";
+import { Link } from "react-router-dom";
 
 export const Blog = ({ blog, LoggedUser }) => {
-  const [isShown, setIsShown] = useState(false);
-  const handleShowBlogDetails = () => {
-    setIsShown(true);
-  };
-  const handleHideBlogDetails = () => {
-    setIsShown(false);
-  };
-
-  const handleLike = async () => {
-    try {
-      const updatedBlog = await blogService.update(blog.id, {
-        ...blog,
-        likes: blog.likes + 1,
-      });
-      console.log(updatedBlog);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const dispatch = useDispatch();
 
   const handleRemoveBlog = async () => {
     try {
       window.confirm(`Are you sure you want to delete this blog?`)
-        ? await blogService.remove(blog.id)
+        ? dispatch(deleteBlogs(blog.id))
         : alert("Good choice, everyone is important");
     } catch (error) {
       console.log(error);
@@ -35,30 +19,11 @@ export const Blog = ({ blog, LoggedUser }) => {
   return (
     <div>
       <fieldset>
-        {!isShown && (
-          <div>
-            {blog.title} {blog.author}{" "}
-            <button onClick={handleShowBlogDetails}>View</button>
-          </div>
-        )}
-        {isShown && (
-          <div>
-            <h3>
-              {blog.title} <button onClick={handleHideBlogDetails}>Hide</button>
-            </h3>
-            <h3>{blog.url}</h3>
-            <h3>
-              {Number(blog.likes)} <button onClick={handleLike}>like</button>
-            </h3>
-            <h3>{blog.user.name}</h3>
-
-            {LoggedUser === blog.user.name ? (
-              <button onClick={handleRemoveBlog}>remove</button>
-            ) : (
-              ""
-            )}
-          </div>
-        )}
+        <div>
+          <Link to={`/blogs/${blog.id}`}>
+            {blog.title} {blog.author}
+          </Link>
+        </div>
       </fieldset>
     </div>
   );

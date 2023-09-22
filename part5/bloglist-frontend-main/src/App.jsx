@@ -1,30 +1,40 @@
 import { useState, useEffect } from "react";
-import blogService from "./services/blogs";
+import blogService from "./services/blogServices";
 import loginService from "./services/login";
 import { BlogList } from "./components/BlogList";
 import { LoginForm } from "./components/LoginForm";
 import { BlogForm } from "./components/BlogForm";
+import { useDispatch, useSelector } from "react-redux";
+import { initializeBlogs, setBlogs } from "./reducers/blogReducer";
+import { setLoggedUser } from "./reducers/loginReducer";
+import { initializeUsers } from "./reducers/userReducer";
+
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { UsersList } from "./components/UsersList";
+import { User } from "./components/User";
+import { BlogView } from "./components/BlogView";
 
 const App = () => {
-  const [blogs, setBlogs] = useState([]);
+  const dispatch = useDispatch();
+  const loggedUser = useSelector((state) => state.login);
+  const blogs = useSelector((state) => state.blogs);
   const [userinput, setuserinput] = useState("");
   const [passwordinput, setpasswordinput] = useState("");
-  const [loggedUser, setLoggedUser] = useState(null);
   const [titleInput, setTitleInput] = useState("");
   const [authorInput, setAuthorInput] = useState("");
   const [urlInput, setUrlInput] = useState("");
 
   useEffect(() => {
-    blogService.getAll().then((blogs) => {
-      setBlogs(blogs.sort((a, b) => a.likes - b.likes));
-    });
+    dispatch(initializeBlogs());
+    dispatch(initializeUsers());
   }, [blogs]);
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem("loggedBlogUser");
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON);
-      setLoggedUser(user);
+      // setLoggedUser(user);
+      dispatch(setLoggedUser(user));
       blogService.setToken(user.token);
     }
   }, [blogs]);
@@ -45,7 +55,7 @@ const App = () => {
       console.log(user);
       window.localStorage.setItem("loggedBlogUser", JSON.stringify(user));
       blogService.setToken(user.token);
-      setLoggedUser(user);
+      dispatch(setLoggedUser(user));
     } catch (error) {
       console.log(error);
     }
@@ -53,36 +63,19 @@ const App = () => {
 
   const handleLogout = () => {
     window.localStorage.clear();
-    setLoggedUser(null);
+    dispatch(setLoggedUser(null));
   };
 
-  const handleTitleInput = (e) => {
-    setTitleInput(e.target.value);
-  };
-  const handleAuthorInput = (e) => {
-    setAuthorInput(e.target.value);
-  };
-  const handleUrlInput = (e) => {
-    setUrlInput(e.target.value);
-  };
-
-  const onAddNewBlog = async (newNote) => {
-    try {
-      const newBlog = await blogService
-        .create({
-          ...newNote,
-        })
-        .then((blog) => {
-          setBlogs(blogs.concat(blog));
-        });
-      console.log(newBlog);
-    } catch (error) {
-      console.log(error);
-    }
-  };
   return (
     <div>
-      {!loggedUser && (
+      <h2>Blogs</h2>
+      {loggedUser ? (
+        <p>
+          <Link to={"/users"}>users </Link> <Link to={"/"}>blogs</Link>
+          {` ${loggedUser.name} is logged in `}
+          <button onClick={handleLogout}>Logout</button>
+        </p>
+      ) : (
         <LoginForm
           onLogin={onLogin}
           handleUserInput={handleUserInput}
@@ -91,23 +84,25 @@ const App = () => {
           handlePasswordInput={handlePasswordInput}
         />
       )}
-      {loggedUser && (
-        <div>
-          <BlogForm
-            name={loggedUser.name}
-            blogs={blogs}
-            titleInput={titleInput}
-            authorInput={authorInput}
-            urlInput={urlInput}
-            handleTitleInput={handleTitleInput}
-            handleAuthorInput={handleAuthorInput}
-            handleUrlInput={handleUrlInput}
-            onAddNewBlog={onAddNewBlog}
-            handleLogout={handleLogout}
-          />
-          <BlogList LoggedUser={loggedUser.name} blogs={blogs} />
-        </div>
-      )}
+
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <div>
+              {loggedUser && (
+                <div>
+                  <BlogForm />
+                  <BlogList LoggedUser={loggedUser.name} blogs={blogs} />
+                </div>
+              )}
+            </div>
+          }
+        />
+        <Route path="/users" element={<UsersList />} />
+        <Route path="/users/:id" element={<User />} />
+        <Route path="/blogs/:id" element={<BlogView />} />
+      </Routes>
     </div>
   );
 };
